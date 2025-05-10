@@ -1,0 +1,101 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "iGGJiKnXR3sZ"
+      },
+      "outputs": [],
+      "source": [
+        "[5/10, 1:40 PM] murugansakthivel9345: !pip install pandas scikit-learn matplotlib seaborn gradio\n",
+        "[5/10, 1:40 PM] murugansakthivel9345: import pandas as pd\n",
+        "import numpy as np\n",
+        "import seaborn as sns\n",
+        "import matplotlib.pyplot as plt\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.ensemble import RandomForestClassifier\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "from sklearn.metrics import accuracy_score, classification_report\n",
+        "import gradio as gr\n",
+        "[5/10, 1:40 PM] murugansakthivel9345: # Example: use your own dataset here\n",
+        "df = pd.read_csv(\"your_health_dataset.csv\")  # Replace with actual dataset path\n",
+        "df.head()\n",
+        "[5/10, 1:41 PM] murugansakthivel9345: # Fill missing values (if any)\n",
+        "df.fillna(method='ffill', inplace=True)\n",
+        "\n",
+        "# Convert categorical to numerical\n",
+        "df_encoded = pd.get_dummies(df, drop_first=True)\n",
+        "\n",
+        "# Split features and target\n",
+        "X = df_encoded.drop('disease_present', axis=1)  # Adjust target name\n",
+        "y = df_encoded['disease_present']\n",
+        "\n",
+        "# Scale features\n",
+        "scaler = StandardScaler()\n",
+        "X_scaled = scaler.fit_transform(X)\n",
+        "[5/10, 1:41 PM] murugansakthivel9345: X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)\n",
+        "\n",
+        "model = RandomForestClassifier()\n",
+        "model.fit(X_train, y_train)\n",
+        "\n",
+        "y_pred = model.predict(X_test)\n",
+        "print(\"Accuracy:\", accuracy_score(y_test, y_pred))\n",
+        "print(classification_report(y_test, y_pred))\n",
+        "[5/10, 1:41 PM] murugansakthivel9345: # Define the prediction function\n",
+        "def predict_disease(age, gender, bp, cholesterol, glucose, smoke, alcohol, activity):\n",
+        "    input_data = pd.DataFrame([{\n",
+        "        'age': age,\n",
+        "        'gender': gender,\n",
+        "        'bp': bp,\n",
+        "        'cholesterol': cholesterol,\n",
+        "        'glucose': glucose,\n",
+        "        'smoke': smoke,\n",
+        "        'alcohol': alcohol,\n",
+        "        'activity': activity\n",
+        "    }])\n",
+        "\n",
+        "    input_encoded = pd.get_dummies(input_data)\n",
+        "    input_encoded = input_encoded.reindex(columns=X.columns, fill_value=0)\n",
+        "    input_scaled = scaler.transform(input_encoded)\n",
+        "\n",
+        "    prediction = model.predict(input_scaled)[0]\n",
+        "    return \"Disease Present\" if prediction == 1 else \"No Disease\"\n",
+        "\n",
+        "# Create Gradio UI\n",
+        "interface = gr.Interface(\n",
+        "    fn=predict_disease,\n",
+        "    inputs=[\n",
+        "        gr.Number(label=\"Age\"),\n",
+        "        gr.Dropdown(['Male', 'Female'], label=\"Gender\"),\n",
+        "        gr.Number(label=\"Blood Pressure\"),\n",
+        "        gr.Number(label=\"Cholesterol Level\"),\n",
+        "        gr.Number(label=\"Glucose Level\"),\n",
+        "        gr.Checkbox(label=\"Do you smoke?\"),\n",
+        "        gr.Checkbox(label=\"Do you drink alcohol?\"),\n",
+        "        gr.Checkbox(label=\"Do you exercise regularly?\")\n",
+        "DiseaseDisease\n",
+        "    outputs=\"text\",\n",
+        "    title=\"AI DDiseaseisease Predictor\",\n",
+        "    description=\"Enter patient health data to predict disease presence.\"\n",
+        "Disease\n",
+        "\n",
+        "interfinterfaceace.launch()"
+      ]
+    }
+  ]
+}
